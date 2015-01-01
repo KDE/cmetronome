@@ -1,18 +1,13 @@
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include <pulse/simple.h>
+#include <pulse/error.h>
+
 #include <iostream>
 #include <fstream>
-#include <unistd.h>
-#include <string.h>
 #include <cerrno>
 #include <exception>
 #include <array>
 #include <vector>
-#include <fcntl.h>
-#include <pulse/simple.h>
-#include <pulse/error.h>
-#define BUFSIZE 1024
+#include <cstring>
 
 using namespace std;
 

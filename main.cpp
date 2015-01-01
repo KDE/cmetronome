@@ -50,10 +50,11 @@ class Metronome
                 sample.insert(sample.end(), buf.begin(), buf.begin()+ifs.gcount());
             }
             ifs.close();
+            auto empty_sample_rate = (m_pasamplespec.rate-1)*60/m_bpm;
             while (true) {
                 if (pa_simple_write(m_pasimple, sample.data(), sample.size(), &m_error) < 0)
                     throw MetronomeException(string(R"(pa_simple_write() failed: )") + pa_strerror(m_error));
-                for (int i = 0; i < m_pasamplespec.rate-1; ++i) {
+                for (auto i = 0; i < empty_sample_rate; ++i) {
                     if (pa_simple_write(m_pasimple, empty_buf.data(), empty_buf.size(), &m_error) < 0)
                         throw MetronomeException(string(R"(pa_simple_write() failed (empty): )") + pa_strerror(m_error));
                 }
@@ -75,20 +76,32 @@ class Metronome
         uint8_t m_signature;
 };
 
+void print_usage(int status)
+{
+    cerr << "Usage: cmetronome [-t bpm] [-s signature] [-h] [-v]\n";
+    exit(status);
+}
+
 int main(int argc, char **argv)
 {
-    int opt, signature, bpm = 60;
-    while ((opt = getopt(argc, argv, "t:s:")) != -1) {
+    int opt, signature = 4, bpm = 60;
+    while ((opt = getopt(argc, argv, "t:s:hv")) != -1) {
         switch (opt) {
         case 't':
-            signature = stoi(optarg);
-            break;
-        case 's':
             bpm = stoi(optarg);
             break;
+        case 's':
+            signature = stoi(optarg);
+            break;
+        case 'h':
+            print_usage(EXIT_SUCCESS);
+            break;
+        case 'v':
+            cout << "cmetronome 0.1\n";
+            return 0;
         default:
-            cerr << "Usage: cmetronome [-t bpm] [-s signature]\n";
-            return 1;
+            print_usage(EXIT_FAILURE);
+            break;
         }
     }
 

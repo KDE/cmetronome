@@ -40,10 +40,10 @@ class PulseAudio
         }
         void play() {
             while (true) {
-                std::basic_ifstream<uint8_t> ifs(sm_filename, ifstream::binary);
+                std::ifstream ifs(sm_filename, ifstream::binary);
                 if(!ifs)
                     throw PulseAudioException(string(R"(Please check the file's existance: )") + sm_filename);
-                array<uint8_t, 64> buf;
+                array<char, 64> buf;
                 ifs.read(buf.data(), buf.size());
                 if (ifs.eof()) break;
                 else if (!ifs.good())

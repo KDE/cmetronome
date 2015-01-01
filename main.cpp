@@ -41,15 +41,15 @@ class PulseAudio
         }
         void play() {
             std::ifstream ifs(sm_filename, ifstream::binary);
+            if(!ifs)
+                throw PulseAudioException(string(R"(Please check the file's existance: )") + sm_filename);
             array<char, 64> buf;
             vector<char> sample;
             while (true) {
-                if(!ifs)
-                    throw PulseAudioException(string(R"(Please check the file's existance: )") + sm_filename);
                 ifs.read(buf.data(), buf.size());
-                if (!ifs.good())
+                if (ifs.eof()) break;
+                else if (!ifs.good())
                     throw PulseAudioException(string(R"(read() failed: )") + strerror(errno));
-                else if (ifs.eof()) break;
                 sample.insert(sample.end(), buf.begin(), buf.begin()+ifs.gcount());
             }
             ifs.close();

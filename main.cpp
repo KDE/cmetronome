@@ -2,9 +2,12 @@
 #include <config.h>
 #endif
 #include <iostream>
+#include <fstream>
 #include <unistd.h>
 #include <string.h>
 #include <cerrno>
+#include <exception>
+#include <array>
 #include <fcntl.h>
 #include <pulse/simple.h>
 #include <pulse/error.h>
@@ -12,64 +15,63 @@
 
 using namespace std;
 
+class PulseAudioException : public exception
+{
+    public:
+        PulseAudioException(string msg = "PulseAudio exception happened!") : message(msg) {}
+        ~PulseAudioException() throw() {}
+        const char* what() const throw() { return message.c_str(); }
+
+    private:
+        string message;
+};
+
 class PulseAudio
 {
     public:
-        PulseAudio()
-        {
+        PulseAudio() {
+            int error;
+            if (!(m_pasimple = pa_simple_new(nullptr, R"("cmetronome")", PA_STREAM_PLAYBACK, nullptr,
+                            R"("cmetronome playback")", &m_pasamplespec, nullptr, nullptr, &error)))
+                throw PulseAudioException(string(__FILE__ R"(": pa_simple_new() failed: ")") + pa_strerror(error));
         }
-        ~PulseAudio()
-        {
-            if (m_simple)
-                pa_simple_free(m_simple);
+        ~PulseAudio() {
+            if (m_pasimple)
+                pa_simple_free(m_pasimple);
         }
-private:
-    constexpr pa_sample_spec ss = {
-        .format = PA_SAMPLE_S16LE,
-        .rate = 44100,
-        .channels = 2
-    };
-    pa_simple *m_simple{nullptr};
+        void play() {
+            int error;
+            while (true) {
+                std::basic_ifstream<uint8_t> ifs(sm_filename, ifstream::binary);
+                if(!ifs)
+                    throw PulseAudioException(string(__FILE__ R"("Please check the file's existance: ")") + sm_filename);
+                array<uint8_t, 64> buf;
+                ifs.read(buf.data(), buf.size());
+                if (ifs.eof()) break;
+                else if (!ifs.good())
+                    throw PulseAudioException(string(__FILE__ R"(": read() failed: ")") + strerror(errno));
+                if (pa_simple_write(m_pasimple, buf.data(), ifs.gcount(), &error) < 0)
+                    throw PulseAudioException(string(__FILE__ R"(": pa_simple_write() failed: ")") + pa_strerror(error));
+            }
+            if (pa_simple_drain(m_pasimple, &error) < 0)
+                throw PulseAudioException(string(__FILE__ R"(": pa_simple_drain() failed: ")") + pa_strerror(error));
+        }
+    private:
+        const pa_sample_spec m_pasamplespec = {
+            .format = PA_SAMPLE_S16LE,
+            .rate = 44100,
+            .channels = 2
+        };
+        pa_simple *m_pasimple{nullptr};
+        static constexpr const char *sm_filename = "metronome1.wav";
 };
 
-int main(int argc, char **argv) {
-    int ret = 1;
-    int error;
-    /* Create a new playback stream */
-    if (!(s = pa_simple_new(NULL, argv[0], PA_STREAM_PLAYBACK, NULL, argv[0], &ss, NULL, NULL, &error))) {
-        cerr << __FILE__": pa_simple_new() failed: " << pa_strerror(error) << endl;
-        goto finish;
+int main(int argc, char **argv)
+{
+    try {
+        PulseAudio pulseAudio;
+        pulseAudio.play();
+    } catch (PulseAudioException &e) {
+        cout << e.what() << endl;
     }
-    while (true) {
-        uint8_t buf[BUFSIZE];
-        ssize_t r;
-#if 0
-        pa_usec_t latency;
-        if ((latency = pa_simple_get_latency(s, &error)) == (pa_usec_t) -1) {
-            fprintf(stderr, __FILE__": pa_simple_get_latency() failed: %s\n", pa_strerror(error));
-            goto finish;
-        }
-        fprintf(stderr, "%0.0f usec \r", (float)latency);
-#endif
-        /* Read some data ... */
-        if ((r = read(STDIN_FILENO, buf, sizeof(buf))) <= 0) {
-            if (r == 0) /* EOF */
-                break;
-            cerr << __FILE__": read() failed: " << strerror(errno) << endl;
-            goto finish;
-        }
-        /* ... and play it */
-        if (pa_simple_write(s, buf, (size_t) r, &error) < 0) {
-            cerr << __FILE__": pa_simple_write() failed: " << pa_strerror(error) << endl;
-            goto finish;
-        }
-    }
-    /* Make sure that every single sample was played */
-    if (pa_simple_drain(s, &error) < 0) {
-        cerr << __FILE__": pa_simple_drain() failed: " << pa_strerror(error) << endl;
-        goto finish;
-    }
-    ret = 0;
-finish:
-    return ret;
 }

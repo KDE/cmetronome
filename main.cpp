@@ -8,6 +8,7 @@
 #include <cerrno>
 #include <exception>
 #include <array>
+#include <vector>
 #include <fcntl.h>
 #include <pulse/simple.h>
 #include <pulse/error.h>
@@ -40,16 +41,25 @@ class PulseAudio
         }
         void play() {
             std::ifstream ifs(sm_filename, ifstream::binary);
-            if(!ifs)
-                throw PulseAudioException(string(R"(Please check the file's existance: )") + sm_filename);
+            array<char, 64> buf;
+            vector<char> sample;
             while (true) {
-                array<char, 64> buf;
+                if(!ifs)
+                    throw PulseAudioException(string(R"(Please check the file's existance: )") + sm_filename);
                 ifs.read(buf.data(), buf.size());
-                if (ifs.eof()) break;
-                else if (!ifs.good())
+                if (!ifs.good())
                     throw PulseAudioException(string(R"(read() failed: )") + strerror(errno));
-                if (pa_simple_write(m_pasimple, buf.data(), ifs.gcount(), &m_error) < 0)
+                else if (ifs.eof()) break;
+                sample.insert(sample.end(), buf.begin(), buf.begin()+ifs.gcount());
+            }
+            ifs.close();
+            while (true) {
+                if (pa_simple_write(m_pasimple, sample.data(), sample.size(), &m_error) < 0)
                     throw PulseAudioException(string(R"(pa_simple_write() failed: )") + pa_strerror(m_error));
+                for (int i = 0; i < m_pasamplespec.rate-1; ++i) {
+                    if (pa_simple_write(m_pasimple, empty_buf.data(), empty_buf.size(), &m_error) < 0)
+                        throw PulseAudioException(string(R"(pa_simple_write() failed (empty): )") + pa_strerror(m_error));
+                }
             }
             if (pa_simple_drain(m_pasimple, &m_error) < 0)
                 throw PulseAudioException(string(R"(pa_simple_drain() failed: )") + pa_strerror(m_error));
@@ -63,6 +73,7 @@ class PulseAudio
         pa_simple *m_pasimple{nullptr};
         static constexpr const char *sm_filename = "metronome1.wav";
         int m_error;
+        array<char, 4> empty_buf{{0, 0, 0, 0}};
 };
 
 int main(int argc, char **argv)

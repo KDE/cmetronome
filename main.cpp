@@ -18,7 +18,7 @@ using namespace std;
 class PulseAudioException : public exception
 {
     public:
-        PulseAudioException(string msg = "PulseAudio exception happened!") : message(msg) {}
+        PulseAudioException(string msg = R"(PulseAudio exception happened!)") : message(msg) {}
         ~PulseAudioException() throw() {}
         const char* what() const throw() { return message.c_str(); }
 
@@ -30,9 +30,9 @@ class PulseAudio
 {
     public:
         PulseAudio() {
-            if (!(m_pasimple = pa_simple_new(nullptr, R"("cmetronome")", PA_STREAM_PLAYBACK, nullptr,
-                            R"("cmetronome playback")", &m_pasamplespec, nullptr, nullptr, &m_error)))
-                throw PulseAudioException(string(R"(": pa_simple_new() failed: ")") + pa_strerror(m_error));
+            if (!(m_pasimple = pa_simple_new(nullptr, R"(cmetronome)", PA_STREAM_PLAYBACK, nullptr,
+                            R"(cmetronome playback)", &m_pasamplespec, nullptr, nullptr, &m_error)))
+                throw PulseAudioException(string(R"(pa_simple_new() failed: )") + pa_strerror(m_error));
         }
         ~PulseAudio() {
             if (m_pasimple)
@@ -42,17 +42,17 @@ class PulseAudio
             while (true) {
                 std::basic_ifstream<uint8_t> ifs(sm_filename, ifstream::binary);
                 if(!ifs)
-                    throw PulseAudioException(string(R"("Please check the file's existance: ")") + sm_filename);
+                    throw PulseAudioException(string(R"(Please check the file's existance: )") + sm_filename);
                 array<uint8_t, 64> buf;
                 ifs.read(buf.data(), buf.size());
                 if (ifs.eof()) break;
                 else if (!ifs.good())
-                    throw PulseAudioException(string(R"(": read() failed: ")") + strerror(errno));
+                    throw PulseAudioException(string(R"(read() failed: )") + strerror(errno));
                 if (pa_simple_write(m_pasimple, buf.data(), ifs.gcount(), &m_error) < 0)
-                    throw PulseAudioException(string(R"(": pa_simple_write() failed: ")") + pa_strerror(m_error));
+                    throw PulseAudioException(string(R"(pa_simple_write() failed: )") + pa_strerror(m_error));
             }
             if (pa_simple_drain(m_pasimple, &m_error) < 0)
-                throw PulseAudioException(string(R"(": pa_simple_drain() failed: ")") + pa_strerror(m_error));
+                throw PulseAudioException(string(R"(pa_simple_drain() failed: )") + pa_strerror(m_error));
         }
     private:
         const pa_sample_spec m_pasamplespec = {

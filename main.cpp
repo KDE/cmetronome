@@ -39,10 +39,10 @@ class PulseAudio
                 pa_simple_free(m_pasimple);
         }
         void play() {
+            std::ifstream ifs(sm_filename, ifstream::binary);
+            if(!ifs)
+                throw PulseAudioException(string(R"(Please check the file's existance: )") + sm_filename);
             while (true) {
-                std::ifstream ifs(sm_filename, ifstream::binary);
-                if(!ifs)
-                    throw PulseAudioException(string(R"(Please check the file's existance: )") + sm_filename);
                 array<char, 64> buf;
                 ifs.read(buf.data(), buf.size());
                 if (ifs.eof()) break;

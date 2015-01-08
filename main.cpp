@@ -42,6 +42,7 @@ class Metronome
                 throw MetronomeException(string(R"(Please check the file's existance: )") + sm_filename);
             array<char, 64> buf;
             vector<char> sample;
+            sample.resize(m_pasamplespec.rate*60/m_bpm*4);
             while (true) {
                 ifs.read(buf.data(), buf.size());
                 if (ifs.eof()) break;
@@ -54,10 +55,6 @@ class Metronome
             while (true) {
                 if (pa_simple_write(m_pasimple, sample.data(), sample.size(), &m_error) < 0)
                     throw MetronomeException(string(R"(pa_simple_write() failed: )") + pa_strerror(m_error));
-                for (auto i = 0; i < empty_sample_rate; ++i) {
-                    if (pa_simple_write(m_pasimple, empty_buf.data(), empty_buf.size(), &m_error) < 0)
-                        throw MetronomeException(string(R"(pa_simple_write() failed (empty): )") + pa_strerror(m_error));
-                }
             }
             if (pa_simple_drain(m_pasimple, &m_error) < 0)
                 throw MetronomeException(string(R"(pa_simple_drain() failed: )") + pa_strerror(m_error));
@@ -71,7 +68,6 @@ class Metronome
         pa_simple *m_pasimple{nullptr};
         static constexpr const char *sm_filename = "metronome1.wav";
         int m_error;
-        array<char, 4> empty_buf{{0, 0, 0, 0}};
         uint8_t m_bpm;
         uint8_t m_signature;
 };

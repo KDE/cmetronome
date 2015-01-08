@@ -42,7 +42,7 @@ class Metronome
                 throw MetronomeException(string(R"(Please check the file's existance: )") + sm_filename);
             array<char, 64> buf;
             vector<char> sample;
-            sample.resize(m_pasamplespec.rate*60/m_bpm*4);
+            sample.resize(m_pasamplespec.rate*60/m_bpm*2);
             while (true) {
                 ifs.read(buf.data(), buf.size());
                 if (ifs.eof()) break;
@@ -63,10 +63,10 @@ class Metronome
         const pa_sample_spec m_pasamplespec = {
             .format = PA_SAMPLE_S16LE,
             .rate = 44100,
-            .channels = 2
+            .channels = 1
         };
         pa_simple *m_pasimple{nullptr};
-        static constexpr const char *sm_filename = "metronome1.wav";
+        static constexpr const char *sm_filename = "metronome1_stereo.wav";
         int m_error;
         uint8_t m_bpm;
         uint8_t m_signature;

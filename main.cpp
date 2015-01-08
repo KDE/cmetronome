@@ -43,13 +43,10 @@ class Metronome
             array<char, 64> buf;
             vector<char> sample;
             sample.resize(m_pasamplespec.rate*60/m_bpm*2);
-            while (true) {
-                ifs.read(buf.data(), buf.size());
-                if (ifs.eof()) break;
-                else if (!ifs.good())
-                    throw MetronomeException(string(R"(read() failed: )") + strerror(errno));
+            while (ifs.read(buf.data(), buf.size()) || ifs.gcount())
                 sample.insert(sample.end(), buf.begin(), buf.begin()+ifs.gcount());
-            }
+            if (ifs.bad())
+                throw MetronomeException(string(R"(read() failed: )") + strerror(errno));
             ifs.close();
             auto empty_sample_rate = (m_pasamplespec.rate-1)*60/m_bpm;
             while (true) {

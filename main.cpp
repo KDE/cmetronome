@@ -13,12 +13,12 @@
 
 using namespace std;
 
-class MetronomeException : public exception
+class MetronomeException final : public exception
 {
     public:
         MetronomeException(string msg = R"(Metronome exception happened!)") : message(msg) {}
         ~MetronomeException() throw() {}
-        const char* what() const throw() { return message.c_str(); }
+        const char* what() const throw() override { return message.c_str(); }
 
     private:
         string message;

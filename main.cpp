@@ -43,7 +43,7 @@ class Metronome
             if (m_filepath.empty()) vsample.insert(vsample.end(), sample.begin(), sample.end());
             else {
                 ifstream ifs(m_filepath, ifstream::binary);
-                if (!ifs) throw MetronomeException(string(R"(Please check the file's existance: )") + m_filepath);
+                if (!ifs) throw MetronomeException(string(R"(Could not open file: )") + m_filepath);
                 array<char, 64> buf;
                 while (ifs.read(buf.data(), buf.size()) || ifs.gcount())
                     vsample.insert(vsample.end(), buf.begin(), buf.begin()+ifs.gcount());

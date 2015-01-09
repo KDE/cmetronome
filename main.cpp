@@ -45,12 +45,12 @@ class Metronome
                 ifstream ifs(m_filepath, ifstream::binary);
                 if (!ifs) throw MetronomeException(string(R"(Please check the file's existance: )") + m_filepath);
                 array<char, 64> buf;
-                vsample.resize(m_pasamplespec.rate*60/m_bpm*2);
                 while (ifs.read(buf.data(), buf.size()) || ifs.gcount())
                     vsample.insert(vsample.end(), buf.begin(), buf.begin()+ifs.gcount());
                 if (ifs.bad()) throw MetronomeException(string(R"(read() failed: )") + strerror(errno));
                 ifs.close();
             }
+            vsample.resize(m_pasamplespec.rate*60/m_bpm*2);
             auto empty_sample_rate = (m_pasamplespec.rate-1)*60/m_bpm;
             while (true) {
                 if (pa_simple_write(m_pasimple, vsample.data(), vsample.size(), &m_error) < 0)

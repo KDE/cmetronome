@@ -37,16 +37,14 @@ class Metronome
                 pa_simple_free(m_pasimple);
         }
         void play() {
-            std::ifstream ifs(sm_filename, ifstream::binary);
-            if(!ifs)
-                throw MetronomeException(string(R"(Please check the file's existance: )") + sm_filename);
+            ifstream ifs(sm_filename, ifstream::binary);
+            if (!ifs) throw MetronomeException(string(R"(Please check the file's existance: )") + sm_filename);
             array<char, 64> buf;
             vector<char> sample;
             sample.resize(m_pasamplespec.rate*60/m_bpm*2);
             while (ifs.read(buf.data(), buf.size()) || ifs.gcount())
                 sample.insert(sample.end(), buf.begin(), buf.begin()+ifs.gcount());
-            if (ifs.bad())
-                throw MetronomeException(string(R"(read() failed: )") + strerror(errno));
+            if (ifs.bad()) throw MetronomeException(string(R"(read() failed: )") + strerror(errno));
             ifs.close();
             auto empty_sample_rate = (m_pasamplespec.rate-1)*60/m_bpm;
             while (true) {
@@ -80,21 +78,11 @@ int main(int argc, char **argv)
     int opt, signature = 4, bpm = 60;
     while ((opt = getopt(argc, argv, "t:s:hv")) != -1) {
         switch (opt) {
-        case 't':
-            bpm = stoi(optarg);
-            break;
-        case 's':
-            signature = stoi(optarg);
-            break;
-        case 'h':
-            print_usage(EXIT_SUCCESS);
-            break;
-        case 'v':
-            cout << "cmetronome 0.1\n";
-            return 0;
-        default:
-            print_usage(EXIT_FAILURE);
-            break;
+        case 't': bpm = stoi(optarg); break;
+        case 's': signature = stoi(optarg); break;
+        case 'h': print_usage(EXIT_SUCCESS); break;
+        case 'v': cout << "cmetronome 0.1\n"; return 0;
+        default: print_usage(EXIT_FAILURE); break;
         }
     }
 

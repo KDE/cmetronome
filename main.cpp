@@ -1,3 +1,5 @@
+#include "sample.h"
+
 #include <pulse/simple.h>
 #include <pulse/error.h>
 
@@ -38,7 +40,8 @@ class Metronome
         }
         void play() {
             vector<char> vsample;
-            if (!m_filepath.empty()) {
+            if (m_filepath.empty()) vsample.insert(vsample.end(), sample.begin(), sample.end());
+            else {
                 ifstream ifs(m_filepath, ifstream::binary);
                 if (!ifs) throw MetronomeException(string(R"(Please check the file's existance: )") + m_filepath);
                 array<char, 64> buf;

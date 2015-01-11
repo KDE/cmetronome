@@ -95,7 +95,7 @@ class Metronome
 
 void print_usage(int status)
 {
-    cerr << "Usage: cmetronome [-t bpm] [-s signature] [-f filepath] [-h] [-v]\n";
+    cerr << "Usage: cmetronome [-t bpm] [-s signature] [-f filepath] [-g filepath] [-h] [-v]\n";
     exit(status);
 }
 

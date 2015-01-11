@@ -95,7 +95,13 @@ class Metronome
 
 void print_usage(int status)
 {
-    cerr << "Usage: cmetronome [-t bpm] [-s signature] [-f filepath] [-g filepath] [-h] [-v]\n";
+    cerr << R"(Usage: cmetronome [option parameter])" << endl << endl;
+    cerr << "\t" << R"(-t The bpm that defines the tempo. It must be a positive number.)" << endl;
+    cerr << "\t" << R"(-s The signature that defines the beginning tick, e.g. 3 or 4.)" << endl;
+    cerr << "\t" << R"(-f The filepath of the beginning tick)" << endl;
+    cerr << "\t" << R"(-g The filepath of the subsequent ticks)" << endl;
+    cerr << "\t" << R"(-h Display this help.)" << endl;
+    cerr << "\t" << R"(-v Display the version.)" << endl;
     exit(status);
 }
 

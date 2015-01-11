@@ -113,8 +113,8 @@ int main(int argc, char **argv)
         switch (opt) {
         case 'f': begin_filepath = optarg; break;
         case 'g': filepath = optarg; break;
-        case 't': bpm = stoi(optarg); break;
-        case 's': signature = stoi(optarg); break;
+        case 't': try {bpm = stoi(optarg); if (bpm < 1) print_usage(EXIT_FAILURE);} catch(exception &) {print_usage(EXIT_FAILURE);} break;
+        case 's': try {signature = stoi(optarg);} catch(exception &) {print_usage(EXIT_FAILURE);} break;
         case 'h': print_usage(EXIT_SUCCESS); break;
         case 'v': cout << "cmetronome 0.1\n"; return 0;
         default: print_usage(EXIT_FAILURE); break;

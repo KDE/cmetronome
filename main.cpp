@@ -65,8 +65,7 @@ class Metronome
                 ifs.close();
             }
             vsample.resize(ssample);
-            auto empty_sample_rate = (m_pasamplespec.rate-1)*60/m_bpm;
-            int count = 0;
+            uint8_t count = 0;
             while (true) {
                 if (!count++) {
                     if (pa_simple_write(m_pasimple, vbsample.data(), vbsample.size(), &m_error) < 0)

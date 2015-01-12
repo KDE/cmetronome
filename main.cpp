@@ -51,7 +51,8 @@ class Metronome
                 if (ifs.bad()) throw MetronomeException(string(R"(read() failed: )") + strerror(errno));
                 ifs.close();
             }
-            vbsample.resize(m_pasamplespec.rate*60/m_bpm*m_pasamplespec.channels*2);
+            size_t ssample = m_pasamplespec.rate*60/m_bpm*m_pasamplespec.channels*pa_sample_size(&m_pasamplespec);
+            vbsample.resize(ssample);
             vector<char> vsample;
             if (m_filepath.empty()) vsample.insert(vsample.end(), sample.begin(), sample.end());
             else {
@@ -63,7 +64,7 @@ class Metronome
                 if (ifs.bad()) throw MetronomeException(string(R"(read() failed: )") + strerror(errno));
                 ifs.close();
             }
-            vsample.resize(m_pasamplespec.rate*60/m_bpm*m_pasamplespec.channels*2);
+            vsample.resize(ssample);
             auto empty_sample_rate = (m_pasamplespec.rate-1)*60/m_bpm;
             int count = 0;
             while (true) {

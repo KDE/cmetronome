@@ -81,9 +81,9 @@ class Metronome
         }
     private:
         const pa_sample_spec m_pasamplespec = {
-            .format = PA_SAMPLE_S16LE,
-            .rate = 44100,
-            .channels = 1
+            /*.format =*/ PA_SAMPLE_S16LE,
+            /*.rate =*/ 44100,
+            /*.channels =*/ 1
         };
         pa_simple *m_pasimple{nullptr};
         int m_error;

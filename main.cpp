@@ -95,9 +95,9 @@ class Metronome
 
 void print_usage(int status)
 {
-    cerr << R"(Usage: cmetronome [option parameter])" << endl << endl;
-    cerr << "\t" << R"(-t The bpm that defines the tempo. It must be a positive number.)" << endl;
-    cerr << "\t" << R"(-s The signature that defines the beginning tick, e.g. 3 or 4. The valid range is 1-64.)" << endl;
+    cerr << R"(Usage: cmetronome [option parameter])" << endl;
+    cerr << "\t" << R"(-t The bpm that defines the tempo, e.g. 120. The valid range is 1-300. The default is 60.)" << endl;
+    cerr << "\t" << R"(-s The signature that defines the beginning tick, e.g. 3 or 4. The valid range is 1-64. The default is 4.)" << endl;
     cerr << "\t" << R"(-f The filepath of the beginning tick. The file specified should contain raw PCM S16LE 44.1 kHz stereo samples)" << endl;
     cerr << "\t" << R"(-g The filepath of the subsequent ticks. The file specified should contain raw PCM S16LE 44.1 kHz stereo samples)" << endl;
     cerr << "\t" << R"(-h Display this help.)" << endl;
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
         switch (opt) {
         case 'f': begin_filepath = optarg; break;
         case 'g': filepath = optarg; break;
-        case 't': try {bpm = stoi(optarg); if (bpm < 1) print_usage(EXIT_FAILURE);} catch(exception &) {print_usage(EXIT_FAILURE);} break;
+        case 't': try {bpm = stoi(optarg); if (bpm < 1 or bpm > 300) print_usage(EXIT_FAILURE);} catch(exception &) {print_usage(EXIT_FAILURE);} break;
         case 's': try {signature = stoi(optarg); if (signature < 1 or signature > 64) print_usage(EXIT_FAILURE);} catch(exception &) {print_usage(EXIT_FAILURE);} break;
         case 'h': print_usage(EXIT_SUCCESS); break;
         case 'v': cout << "cmetronome 0.1\n"; return 0;

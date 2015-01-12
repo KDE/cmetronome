@@ -29,7 +29,7 @@ class MetronomeException final : public exception
 class Metronome
 {
     public:
-        Metronome(uint8_t bpm = 60, uint8_t signature = 4, string begin_filepath = string(),  string filepath = string())
+        Metronome(uint16_t bpm = 60, uint8_t signature = 4, string begin_filepath = string(),  string filepath = string())
             : m_bpm(bpm), m_signature(signature), m_begin_filepath(begin_filepath), m_filepath(filepath) {
             if (!(m_pasimple = pa_simple_new(nullptr, R"(cmetronome)", PA_STREAM_PLAYBACK, nullptr,
                             R"(cmetronome playback)", &m_pasamplespec, nullptr, nullptr, &m_error)))
@@ -87,7 +87,7 @@ class Metronome
         };
         pa_simple *m_pasimple{nullptr};
         int m_error;
-        uint8_t m_bpm;
+        uint16_t m_bpm;
         uint8_t m_signature;
         string m_begin_filepath;
         string m_filepath;
